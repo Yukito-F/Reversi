@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Disc : MonoBehaviour
@@ -29,6 +27,5 @@ public class Disc : MonoBehaviour
         {
             rig.AddTorque(5.0f, 0, 0);
         }
-
     }
 }

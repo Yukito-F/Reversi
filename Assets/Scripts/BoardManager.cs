@@ -1,24 +1,30 @@
+using System;
 using UnityEngine;
 
 public class BoardManager : MonoBehaviour
 {
     public int[,] boardInfo = new int[8, 8];
-    private GameObject[,] discList = new GameObject[8,8];
+    private GameObject[,] discList = new GameObject[8, 8];
+    private GameObject[,] cursorList = new GameObject[8, 8];
+
+    GameObject disc;
 
     // 1:Black 0:void -1:White
     private void Start()
     {
-        GameObject prefab = Resources.Load("Disc") as GameObject;
+        disc = Resources.Load("Disc") as GameObject;
+        GameObject cursor = Resources.Load("Cursor") as GameObject;
+
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
             {
-                boardInfo[i, j] = 1;
-                discList[i, j] = Instantiate(prefab,
-                                             new Vector3(-3.5f + i, 1, -3.5f + j),
-                                             Quaternion.identity);
+                boardInfo[i, j] = 0;
+                cursorList[i, j] = Instantiate(cursor,
+                                               new Vector3(-3.5f + i, 0.01f, -3.5f + j),
+                                               Quaternion.identity);
             }
-        }   
+        }
     }
 
     private void Update()
@@ -40,16 +46,21 @@ public class BoardManager : MonoBehaviour
                 disc.GetComponent<Disc>().reload(state);
             }
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    boardInfo[i, j] = Random.Range(-1, 1);
-                }
-            }
-        }
+    public void put(int row, int column)
+    {
+        // black
+        boardInfo[row, column] = 1;
+        discList[row, column] = Instantiate(disc,
+                             new Vector3(-3.5f + row, 1, -3.5f + column),
+                             Quaternion.identity);
+
+        // white
+        //boardInfo[row, column] = -1;
+        //discList[row, column] = Instantiate(disc,
+        //                     new Vector3(-3.5f + row, 1, -3.5f + column),
+        //                     Quaternion.identity);
+        //discList[row, column].transform.Rotate(180, 0, 0);
     }
 }
