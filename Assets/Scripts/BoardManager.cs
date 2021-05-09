@@ -7,12 +7,10 @@ public class BoardManager : MonoBehaviour
     private GameObject[,] discList = new GameObject[8, 8];
     private GameObject[,] cursorList = new GameObject[8, 8];
 
-    GameObject disc;
-
     // 1:Black 0:void -1:White
     private void Start()
     {
-        disc = Resources.Load("Disc") as GameObject;
+        GameObject disc = Resources.Load("Disc") as GameObject;
         GameObject cursor = Resources.Load("Cursor") as GameObject;
 
         for (int i = 0; i < 8; i++)
@@ -20,30 +18,30 @@ public class BoardManager : MonoBehaviour
             for (int j = 0; j < 8; j++)
             {
                 boardInfo[i, j] = 0;
+                discList[i, j] = Instantiate(disc,
+                                             new Vector3(-3.5f + i, 0.5f, -3.5f + j),
+                                             Quaternion.identity);
+                discList[i, j].SetActive(false);
                 cursorList[i, j] = Instantiate(cursor,
                                                new Vector3(-3.5f + i, 0.01f, -3.5f + j),
                                                Quaternion.identity);
             }
         }
-    }
 
-    private void Update()
-    {
-        for (int i = 0; i < 8; i++)
+        for (int i = 3; i < 5; i++)
         {
-            for (int j = 0; j < 8; j++)
+            for (int j = 3; j < 5; j++)
             {
-                int state = boardInfo[i, j];
-                GameObject disc = discList[i, j];
-                if (state == 0)
+                discList[i, j].SetActive(true);
+                if ((i + j) % 2 == 0)
                 {
-                    if (disc.activeSelf) disc.SetActive(false);
+                    boardInfo[i, j] = 1;
                 }
                 else
                 {
-                    if (!disc.activeSelf) disc.SetActive(true);
+                    boardInfo[i, j] = -1;
+                    discList[i, j].transform.Rotate(180, 0, 0);
                 }
-                disc.GetComponent<Disc>().reload(state);
             }
         }
     }
@@ -52,15 +50,13 @@ public class BoardManager : MonoBehaviour
     {
         // black
         boardInfo[row, column] = 1;
-        discList[row, column] = Instantiate(disc,
-                             new Vector3(-3.5f + row, 1, -3.5f + column),
-                             Quaternion.identity);
+        GameObject disc = discList[row, column];
+        if (!disc.activeSelf) disc.SetActive(true);
 
         // white
         //boardInfo[row, column] = -1;
-        //discList[row, column] = Instantiate(disc,
-        //                     new Vector3(-3.5f + row, 1, -3.5f + column),
-        //                     Quaternion.identity);
+        //GameObject disc = discList[row, column];
+        //if (!disc.activeSelf) disc.SetActive(true);
         //discList[row, column].transform.Rotate(180, 0, 0);
     }
 }
