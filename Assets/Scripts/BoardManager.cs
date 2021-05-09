@@ -1,18 +1,20 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BoardManager : MonoBehaviour
 {
-    public int[,] boardInfo = new int[8, 8];
+    private int[,] boardInfo = new int[8, 8];
     private GameObject[,] discList = new GameObject[8, 8];
-    private GameObject[,] cursorList = new GameObject[8, 8];
+    private CursorController[,] cursorList = new CursorController[8, 8];
 
-    GameObject disc;
+    private List<int[]>[,] expectedTable = new List<int[]>[8, 8];
+    private int turn = 1; // 1:Black, -1:White
 
     // 1:Black 0:void -1:White
     private void Start()
     {
-        disc = Resources.Load("Disc") as GameObject;
+        GameObject disc = Resources.Load("Disc") as GameObject;
         GameObject cursor = Resources.Load("Cursor") as GameObject;
 
         for (int i = 0; i < 8; i++)
@@ -20,47 +22,121 @@ public class BoardManager : MonoBehaviour
             for (int j = 0; j < 8; j++)
             {
                 boardInfo[i, j] = 0;
-                cursorList[i, j] = Instantiate(cursor,
-                                               new Vector3(-3.5f + i, 0.01f, -3.5f + j),
-                                               Quaternion.identity);
+                discList[i, j] = Instantiate(disc,
+                             new Vector3(-3.5f + i, 0.5f, -3.5f + j),
+                             Quaternion.identity);
+                discList[i, j].SetActive(false);
+                var _cursor = Instantiate(cursor,
+                                          new Vector3(-3.5f + i, 0, -3.5f + j),
+                                          Quaternion.identity);
+                cursorList[i, j] = _cursor.GetComponent<CursorController>();
             }
         }
-    }
-
-    private void Update()
-    {
-        for (int i = 0; i < 8; i++)
+        for (int i = 3; i < 5; i++)
         {
-            for (int j = 0; j < 8; j++)
+            for (int j = 3; j < 5; j++)
             {
-                int state = boardInfo[i, j];
-                GameObject disc = discList[i, j];
-                if (state == 0)
+                discList[i, j].SetActive(true);
+                if ((i + j) % 2 == 0)
                 {
-                    if (disc.activeSelf) disc.SetActive(false);
+                    boardInfo[i, j] = 1;
                 }
                 else
                 {
-                    if (!disc.activeSelf) disc.SetActive(true);
+                    boardInfo[i, j] = -1;
+                    discList[i, j].transform.Rotate(180, 0, 0);
                 }
-                disc.GetComponent<Disc>().reload(state);
             }
         }
+        checkBoard(-1);
     }
 
     public void put(int row, int column)
     {
-        // black
-        boardInfo[row, column] = 1;
-        discList[row, column] = Instantiate(disc,
-                             new Vector3(-3.5f + row, 1, -3.5f + column),
-                             Quaternion.identity);
+        boardInfo[row, column] = turn;
+        GameObject disc = discList[row, column];
+        if (!disc.activeSelf) disc.SetActive(true);
+        if (turn == -1) disc.transform.Rotate(180, 0, 0);
 
-        // white
-        //boardInfo[row, column] = -1;
-        //discList[row, column] = Instantiate(disc,
-        //                     new Vector3(-3.5f + row, 1, -3.5f + column),
-        //                     Quaternion.identity);
-        //discList[row, column].transform.Rotate(180, 0, 0);
+        foreach (int[] index in expectedTable[row, column])
+        {
+            discList[index[0], index[1]].GetComponent<Disc>().reload(turn);
+            boardInfo[index[0], index[1]] = turn;
+        }
+
+        checkBoard(turn);
+        turn *= -1;
+    }
+
+    private void checkBoard(int enemy)
+    {
+        expectedTable = new List<int[]>[8, 8];
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                var tempList = checkRadiation(i, j, enemy);
+                if (tempList != null)
+                {
+                    expectedTable[i, j] = tempList;
+                }
+                cursorList[i, j].changeColor(tempList != null);
+            }
+        }
+    }
+
+    private List<int[]> checkRadiation(int row, int column, int enemy)
+    {
+        List<int[]> expectedRadiation = new List<int[]>();
+        bool exist = false;
+        if (boardInfo[row, column] == 0)
+        {
+            for (int i = -1; i < 2; i++)
+            {
+                for (int j = -1; j < 2; j++)
+                {
+                    var tempList = checkLine(row, column, i, j, enemy);
+                    if (tempList != null)
+                    {
+                        exist = true;
+                        foreach (int[] item in tempList)
+                        {
+                            expectedRadiation.Add(item);
+                        }
+                    }
+                }
+            }
+        }
+        if (exist)
+        {
+            return expectedRadiation;
+        }
+        return null;
+    }
+
+    private List<int[]> checkLine(int row, int column, int up, int right, int enemy)
+    {
+        List<int[]> expectedLine = new List<int[]>();
+
+        int rowCursor = row + up;
+        int columnCursor = column + right;
+        if (Mathf.Abs(3.5f - rowCursor) > 4 || Mathf.Abs(3.5f - columnCursor) > 4 || (up == 0 && right == 0))
+        {
+            return null;
+        }
+        if (boardInfo[rowCursor, columnCursor] == enemy)
+        {
+            while (Mathf.Abs(3.5f - rowCursor) < 4 && Mathf.Abs(3.5f - columnCursor) < 4 && boardInfo[rowCursor, columnCursor] == enemy)
+            {
+                expectedLine.Add(new int[] { rowCursor, columnCursor });
+                rowCursor += up;
+                columnCursor += right;
+                if(Mathf.Abs(3.5f - rowCursor) < 4 && Mathf.Abs(3.5f - columnCursor) < 4 && boardInfo[rowCursor, columnCursor] == -enemy)
+                {
+                    return expectedLine;
+                }
+            }
+        }
+        return null;
     }
 }
