@@ -64,12 +64,21 @@ public class BoardManager : MonoBehaviour
             boardInfo[index[0], index[1]] = turn;
         }
 
-        checkBoard(turn);
+        if (checkBoard(turn))
+        {
+            turn *= -1;
+            if (checkBoard(turn))
+            {
+                Debug.Log("END");
+            }
+        };
         turn *= -1;
     }
 
-    private void checkBoard(int enemy)
+    private bool checkBoard(int enemy)
     {
+        bool exist = true;
+
         expectedTable = new List<int[]>[8, 8];
         for (int i = 0; i < 8; i++)
         {
@@ -79,10 +88,13 @@ public class BoardManager : MonoBehaviour
                 if (tempList != null)
                 {
                     expectedTable[i, j] = tempList;
+                    exist = false;
                 }
                 cursorList[i, j].changeColor(tempList != null);
             }
         }
+
+        return exist;
     }
 
     private List<int[]> checkRadiation(int row, int column, int enemy)
@@ -126,17 +138,22 @@ public class BoardManager : MonoBehaviour
         }
         if (boardInfo[rowCursor, columnCursor] == enemy)
         {
-            while (Mathf.Abs(3.5f - rowCursor) < 4 && Mathf.Abs(3.5f - columnCursor) < 4 && boardInfo[rowCursor, columnCursor] == enemy)
+            while (outDetect(rowCursor, columnCursor) && boardInfo[rowCursor, columnCursor] == enemy)
             {
                 expectedLine.Add(new int[] { rowCursor, columnCursor });
                 rowCursor += up;
                 columnCursor += right;
-                if(Mathf.Abs(3.5f - rowCursor) < 4 && Mathf.Abs(3.5f - columnCursor) < 4 && boardInfo[rowCursor, columnCursor] == -enemy)
+                if(outDetect(rowCursor, columnCursor) && boardInfo[rowCursor, columnCursor] == -enemy)
                 {
                     return expectedLine;
                 }
             }
         }
         return null;
+    }
+
+    private bool outDetect(int row, int column)
+    {
+        return (Mathf.Abs(3.5f - row) < 4 && Mathf.Abs(3.5f - column) < 4);
     }
 }
