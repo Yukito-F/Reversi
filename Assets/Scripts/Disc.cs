@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Disc : MonoBehaviour
 {
-    int state = 1;
+    int state;
     Rigidbody rig;
 
     private void Start()
@@ -12,20 +12,21 @@ public class Disc : MonoBehaviour
 
     public void reload(int remoteState)
     {
-        if(state == remoteState)
+        if (state == remoteState)
         {
             return;
         }
 
-        rig.AddForce(0, 15.0f, 0);
+        rig.AddForce(0, 20.0f, 0);
+        rig.AddTorque(0.8f, 0, 0);
         state = remoteState;
     }
 
     private void Update()
     {
-        if (Mathf.Abs(transform.eulerAngles.x - (90 + 90 * state)) < 5)
+        if (Input.GetKeyDown(KeyCode.A))
         {
-            rig.AddTorque(5.0f, 0, 0);
+            reload(-1 * state);
         }
     }
 }
