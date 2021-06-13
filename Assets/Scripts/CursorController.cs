@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class CursorController : MonoBehaviour
 {
+    // –¼‘O‚ÆF•ÏX
     public void changeColor(bool emphasis)
     {
         if (emphasis)
