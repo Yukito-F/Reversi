@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -91,6 +93,27 @@ public class BoardManager : MonoBehaviour
         // 通常のターン切り替え
         turn *= -1;
         boardCounter.reload(boardInfo, turn);
+
+        // おける場所が一マスだった時に自動的に設置
+        List<int[]> indexes = new List<int[]>();
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (cursorList[i, j].gameObject.name == "Enable")
+                {
+                    indexes.Add(new int[] { i, j });
+                }
+            }
+        }
+        if (indexes.Count == 1)
+        {
+            Debug.Log("AutoPut");
+            StartCoroutine(DelayMethod(2.0f, () =>
+            {
+                put(indexes[0][0], indexes[0][1]);
+            }));
+        }
     }
 
     // 盤面探索(設置可能判定)、返り値:設置可能なマスが一か所でもあればfalse
@@ -120,7 +143,7 @@ public class BoardManager : MonoBehaviour
                         exist = false;
                     }
                 }
-                // 色の変更(無駄な書き方してます。)
+                // 色の変更
                 cursorList[i, j].changeColor(expectedTable[i, j] != null);
             }
         }
@@ -203,5 +226,11 @@ public class BoardManager : MonoBehaviour
     private bool outDetect(int row, int column)
     {
         return (Mathf.Abs(3.5f - row) < 4 && Mathf.Abs(3.5f - column) < 4);
+    }
+
+    private IEnumerator DelayMethod(float waitTime, Action action)
+    {
+        yield return new WaitForSeconds(waitTime);
+        action();
     }
 }
