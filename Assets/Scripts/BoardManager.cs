@@ -28,11 +28,11 @@ public class BoardManager : MonoBehaviour
             {
                 boardInfo[i, j] = 0;
                 discList[i, j] = Instantiate(disc,
-                             new Vector3(-3.5f + i, 0.5f, -3.5f + j),
-                             Quaternion.identity);
+                                             new Vector3(-3.5f + j, 0.5f, -3.5f + i),
+                                             Quaternion.identity);
                 discList[i, j].SetActive(false);
                 var _cursor = Instantiate(cursor,
-                                          new Vector3(-3.5f + i, 0, -3.5f + j),
+                                          new Vector3(-3.5f + j, 0, -3.5f + i),
                                           Quaternion.identity);
                 cursorList[i, j] = _cursor.GetComponent<CursorController>();
             }

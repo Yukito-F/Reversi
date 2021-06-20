@@ -59,6 +59,8 @@ public class CursorManager : MonoBehaviour
         {
             return;
         }
-        board.put((int)(transform.position.x + 3.5f), (int)(transform.position.z + 3.5f));
+        int row = (int)(transform.position.z + 3.5f);
+        int column = (int)(transform.position.x + 3.5f);
+        board.put(row, column);
     }
 }
