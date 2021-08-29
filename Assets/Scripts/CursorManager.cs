@@ -1,6 +1,7 @@
+using Photon.Pun;
 using UnityEngine;
 
-public class CursorManager : MonoBehaviour
+public class CursorManager : MonoBehaviourPunCallbacks
 {
     [SerializeField]
     Texture2D defaultCursor = null;
@@ -9,13 +10,10 @@ public class CursorManager : MonoBehaviour
     RaycastHit hit;
     GameObject targetObject;
 
-    BoardManager board;
-
     private void Start()
     {
         mainCamera = Camera.main;
         Cursor.SetCursor(defaultCursor, Vector2.zero, CursorMode.Auto);
-        board = GameObject.Find("BoardManager").GetComponent<BoardManager>();
     }
     private void Update()
     {
@@ -61,6 +59,7 @@ public class CursorManager : MonoBehaviour
         }
         int row = (int)(transform.position.z + 3.5f);
         int column = (int)(transform.position.x + 3.5f);
-        board.put(row, column);
+
+        PhotonNetwork.LocalPlayer.PosUpdate(row, column);
     }
 }

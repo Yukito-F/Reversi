@@ -10,9 +10,10 @@ public class BoardManager : MonoBehaviour
     private CursorController[,] cursorList = new CursorController[8, 8];
 
     private List<int[]>[,] expectedTable = new List<int[]>[8, 8];
-    private int turn = 1; // 1:Black, -1:White
+    public int turn = 1; // 1:Black, -1:White
 
     private CanvasController boardCounter;
+
     // 1:Black 0:void -1:White
     private void Start()
     {
@@ -232,5 +233,10 @@ public class BoardManager : MonoBehaviour
     {
         yield return new WaitForSeconds(waitTime);
         action();
+    }
+
+    public int getTurn()
+    {
+        return (1 - turn) / 2 + 1;
     }
 }
